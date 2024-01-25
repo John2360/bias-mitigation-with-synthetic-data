@@ -34,4 +34,8 @@ class Validator:
 
         return data.isin(enum)
     
+    def validate_type(self, column, type):
+        data = self.data_to_validate[column]
+        return data.apply(lambda x: isinstance(x, type))
+    
     
