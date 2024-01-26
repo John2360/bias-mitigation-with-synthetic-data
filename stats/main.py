@@ -1,7 +1,7 @@
 from sklearn.metrics import confusion_matrix
 
 class Stats:
-    def __init__(self, predictions, labels, race_columns, gender_columns, positive=1):
+    def __init__(self, predictions, labels, positive=1):
         self.predictions = predictions
         self.labels = labels
         self.positive_label = 1
