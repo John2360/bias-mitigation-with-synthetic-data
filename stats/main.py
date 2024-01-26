@@ -173,10 +173,10 @@ class Stats:
                 if group_a == group_b:
                     continue
                 
-                spd = self.calculate_spd(category_a_indices[group_a], category_a_indices[group_b])
-                di = self.calculate_di(category_a_indices[group_a], category_a_indices[group_b])
-                eod = self.calculate_eod(category_a_indices[group_a], category_a_indices[group_b])
-                aaod = self.calculate_aaod(category_a_indices[group_a], category_a_indices[group_b])
+                spd = self.calculate_spd(category_b_indices[group_a], category_b_indices[group_b])
+                di = self.calculate_di(category_b_indices[group_a], category_b_indices[group_b])
+                eod = self.calculate_eod(category_b_indices[group_a], category_b_indices[group_b])
+                aaod = self.calculate_aaod(category_b_indices[group_a], category_b_indices[group_b])
 
                 categoy_b_results[f"{group_a} vs {group_b}"] = {
                     'Statistical Parity Difference': spd,
