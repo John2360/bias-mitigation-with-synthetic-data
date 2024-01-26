@@ -72,7 +72,7 @@ class Stats:
 
     def true_negatives(self):
         if self.true_negatives_val is not None:
-            return self.true_negatives
+            return self.true_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
         self.true_negatives_val = conf_matrix[0, 0]
