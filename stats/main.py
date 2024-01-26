@@ -148,10 +148,10 @@ class Stats:
         tn, _, _, tp = confusion_matrix(y_true=labels, y_pred=predictions).ravel()
         return (tn + tp) / len(labels)
     
-    def save_metrics(self, file_name='model_metrics.txt', print=True):
-        if print:
+    def save_metrics(self, file_name='model_metrics.txt', doPrint=True):
+        if doPrint:
             print('Calculating metrics...')
-            
+
         metrics = {
             'True Positives': self.true_positives(),
             'True Negatives': self.true_negatives(),
@@ -178,6 +178,6 @@ class Stats:
             for key, value in metrics.items():
                 file.write(f'{key}: {value}\n')
                 
-                if print:
+                if doPrint:
                     print(f'{key}: {value}')
     
