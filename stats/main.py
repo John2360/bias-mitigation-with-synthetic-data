@@ -1,15 +1,15 @@
 from sklearn.metrics import confusion_matrix
 
 class Stats:
-    def __init__(self, predictions, labels, positive=1):
+    def __init__(self, predictions, labels, race_columns, gender_columns, positive=1):
         self.predictions = predictions
         self.labels = labels
         self.positive_label = 1
         
-        self.true_positives = None
-        self.true_negatives = None
-        self.false_positives = None
-        self.false_negatives = None
+        self.true_positives_val = None
+        self.true_negatives_val = None
+        self.false_positives_val = None
+        self.false_negatives_val = None
 
     def calculate_accuracy(self):
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
@@ -63,36 +63,36 @@ class Stats:
         return 0.5 * abs(odds_protected_group - odds_reference_group)
     
     def true_positives(self):
-        if self.true_positives is not None:
-            return self.true_positives
+        if self.true_positives_val is not None:
+            return self.true_positives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.true_positives = conf_matrix[self.positive_label, self.positive_label]
-        return self.true_positives
+        self.true_positives_val = conf_matrix[self.positive_label, self.positive_label]
+        return self.true_positives_val
 
     def true_negatives(self):
-        if self.true_negatives is not None:
+        if self.true_negatives_val is not None:
             return self.true_negatives
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.true_negatives = conf_matrix[0, 0]
-        return self.true_negatives
+        self.true_negatives_val = conf_matrix[0, 0]
+        return self.true_negatives_val
 
     def false_positives(self):
-        if self.false_positives is not None:
-            return self.false_positives
+        if self.false_positives_val is not None:
+            return self.false_positives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_positives = conf_matrix[0, self.positive_label]
-        return self.false_positives
+        self.false_positives_val = conf_matrix[0, self.positive_label]
+        return self.false_positives_val
 
     def false_negatives(self):
-        if self.false_negatives is not None:
-            return self.false_negatives
+        if self.false_negatives_val is not None:
+            return self.false_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_negatives = conf_matrix[self.positive_label, 0]
-        return self.false_negatives
+        self.false_negatives_val = conf_matrix[self.positive_label, 0]
+        return self.false_negatives_val
 
     def true_positive_rate(self):
         tp = self.true_positives()
@@ -148,7 +148,44 @@ class Stats:
         tn, _, _, tp = confusion_matrix(y_true=labels, y_pred=predictions).ravel()
         return (tn + tp) / len(labels)
     
-    def save_metrics(self, file_name='model_metrics.txt', doPrint=True):
+    def save_metrics(self, category_a_indices, category_b_indices, category_a_name="Race", category_b_name="Sex", file_name='model_metrics.txt', doPrint=True):
+        categoy_a_results = {}
+        for group_a in category_a_indices:
+            for group_b in category_a_indices:
+                if group_a == group_b:
+                    continue
+                
+                spd = self.calculate_spd(category_a_indices[group_a], category_a_indices[group_b])
+                di = self.calculate_di(category_a_indices[group_a], category_a_indices[group_b])
+                eod = self.calculate_eod(category_a_indices[group_a], category_a_indices[group_b])
+                aaod = self.calculate_aaod(category_a_indices[group_a], category_a_indices[group_b])
+
+                categoy_a_results[f"{group_a} vs {group_b}"] = {
+                    'Statistical Parity Difference': spd,
+                    'Disparate Impact': di,
+                    'Equal Opportunity Difference': eod,
+                    'Average Absolute Odds Difference': aaod
+                }
+
+        categoy_b_results = {}
+        for group_a in category_b_indices:
+            for group_b in category_b_indices:
+                if group_a == group_b:
+                    continue
+                
+                spd = self.calculate_spd(category_a_indices[group_a], category_a_indices[group_b])
+                di = self.calculate_di(category_a_indices[group_a], category_a_indices[group_b])
+                eod = self.calculate_eod(category_a_indices[group_a], category_a_indices[group_b])
+                aaod = self.calculate_aaod(category_a_indices[group_a], category_a_indices[group_b])
+
+                categoy_b_results[f"{group_a} vs {group_b}"] = {
+                    'Statistical Parity Difference': spd,
+                    'Disparate Impact': di,
+                    'Equal Opportunity Difference': eod,
+                    'Average Absolute Odds Difference': aaod
+                }
+
+
         if doPrint:
             print('Calculating metrics...')
 
@@ -168,10 +205,8 @@ class Stats:
             'Rate of Positive Predictions': self.rate_of_positive_predictions(),
             'Rate of Negative Predictions': self.rate_of_negative_predictions(),
             'Accuracy': self.calculate_accuracy(),
-            'Statistical Parity Difference': self.calculate_spd(),
-            'Disparate Impact': self.calculate_di(),
-            'Equal Opportunity Difference': self.calculate_eod(),
-            'Average Absolute Odds Difference': self.calculate_aaod()
+            f'{category_a_name} Results': categoy_a_results,
+            f'{category_b_name} Results': categoy_b_results
         }
         
         with open(file_name, 'w') as file:
