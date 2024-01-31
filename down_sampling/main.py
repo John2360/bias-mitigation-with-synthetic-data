@@ -11,10 +11,10 @@ class Downsampler:
             data['_weights'] = 1.0
         self.data = data
 
-    def downsample(self, feature="", majority="", minority="", ratio=.2, upweight=False):
+    def downsample(self, feature="", majority="", minority="", n_samples=100, upweight=False):
         """Downsamples dataset to balance classes."""
-        if ratio < 0 or ratio > 1:
-            raise Exception("ratio must be between 0 and 1")
+        # if ratio < 0 or ratio > 1:
+        #     raise Exception("ratio must be between 0 and 1")
 
         if majority == "" or minority == "" or feature == "":
             raise Exception("feature, majority, and minority must be specified")
@@ -32,9 +32,8 @@ class Downsampler:
         if len(majority_data) < len(minority_data):
             raise Exception("majority class must be less than or equal to minority class")
  
-        n_samples = int(len(minority_data) / (1 - ratio))
+        # n_samples = int(len(minority_data) / (1 - ratio))
         majority_resample = majority_data.sample(n=n_samples, replace=True)
-
         decrease_ratio = n_samples / len(majority_data)
         
         if upweight:
