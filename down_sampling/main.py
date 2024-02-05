@@ -33,7 +33,7 @@ class Downsampler:
             raise Exception("majority class must be less than or equal to minority class")
  
         # n_samples = int(len(minority_data) / (1 - ratio))
-        majority_resample = majority_data.sample(n=n_samples, replace=True)
+        majority_resample = majority_data.sample(n=len(majority_data) - n_samples, replace=True)
         decrease_ratio = n_samples / len(majority_data)
         
         if upweight:
