@@ -27,7 +27,7 @@ class Downsampler:
         
         majority_data = self.data[self.data[feature] == majority]
         minority_data = self.data[self.data[feature] == minority]
-        minority_majority_free_data = self.data[self.data[feature] != majority and self.data[feature] != minority]
+        minority_majority_free_data = self.data[(self.data[feature] != majority) & (self.data[feature] != minority)]
 
         if len(majority_data) < len(minority_data):
             raise Exception("majority class must be less than or equal to minority class")
