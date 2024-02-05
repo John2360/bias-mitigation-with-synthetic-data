@@ -7,9 +7,9 @@ class Downsampler:
 
     def load_data(self, data):
         """Loads data from pandas dataframe."""
+        self.data = data.copy()
         if '_weights' not in data.columns:
-            data['_weights'] = 1.0
-        self.data = data
+            self.data['_weights'] = 1.0
 
     def downsample(self, feature="", majority="", minority="", n_samples=100, upweight=False):
         """Downsamples dataset to balance classes."""

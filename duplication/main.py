@@ -5,7 +5,7 @@ class DuplicationGenerator:
 
     def load_data(self, data):
         """Loads data from pandas dataframe."""
-        self.data = data
+        self.data = data.copy()
 
     def generate(self, feature="", majority="", minority="", n_samples=100):
         """Generates new data by duplicating samples from the majority class and changing their label to the minority class."""
