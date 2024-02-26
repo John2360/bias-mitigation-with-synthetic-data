@@ -148,7 +148,7 @@ class Stats:
         tn, _, _, tp = confusion_matrix(y_true=labels, y_pred=predictions).ravel()
         return (tn + tp) / len(labels)
     
-    def save_metrics(self, category_a_indices, category_b_indices, category_a_name="Race", category_b_name="Sex", file_name='model_metrics.txt', doPrint=True):
+    def save_metrics(self, category_a_indices, category_b_indices=None, category_a_name="Race", category_b_name="Sex", file_name='model_metrics.txt', doPrint=True):
         categoy_a_results = {}
         for group_a in category_a_indices:
             for group_b in category_a_indices:
@@ -167,23 +167,24 @@ class Stats:
                     'Average Absolute Odds Difference': aaod
                 }
 
-        categoy_b_results = {}
-        for group_a in category_b_indices:
-            for group_b in category_b_indices:
-                if group_a == group_b:
-                    continue
-                
-                spd = self.calculate_spd(category_b_indices[group_a], category_b_indices[group_b])
-                di = self.calculate_di(category_b_indices[group_a], category_b_indices[group_b])
-                eod = self.calculate_eod(category_b_indices[group_a], category_b_indices[group_b])
-                aaod = self.calculate_aaod(category_b_indices[group_a], category_b_indices[group_b])
+        if category_b_indices is not None:
+            categoy_b_results = {}
+            for group_a in category_b_indices:
+                for group_b in category_b_indices:
+                    if group_a == group_b:
+                        continue
+                    
+                    spd = self.calculate_spd(category_b_indices[group_a], category_b_indices[group_b])
+                    di = self.calculate_di(category_b_indices[group_a], category_b_indices[group_b])
+                    eod = self.calculate_eod(category_b_indices[group_a], category_b_indices[group_b])
+                    aaod = self.calculate_aaod(category_b_indices[group_a], category_b_indices[group_b])
 
-                categoy_b_results[f"{group_a} vs {group_b}"] = {
-                    'Statistical Parity Difference': spd,
-                    'Disparate Impact': di,
-                    'Equal Opportunity Difference': eod,
-                    'Average Absolute Odds Difference': aaod
-                }
+                    categoy_b_results[f"{group_a} vs {group_b}"] = {
+                        'Statistical Parity Difference': spd,
+                        'Disparate Impact': di,
+                        'Equal Opportunity Difference': eod,
+                        'Average Absolute Odds Difference': aaod
+                    }
 
 
         if doPrint:
@@ -206,8 +207,10 @@ class Stats:
             'Rate of Negative Predictions': self.rate_of_negative_predictions(),
             'Accuracy': self.calculate_accuracy(),
             f'{category_a_name} Results': categoy_a_results,
-            f'{category_b_name} Results': categoy_b_results
         }
+
+        if category_b_indices is not None:
+            metrics[f'{category_b_name} Results'] = categoy_b_results
         
         with open(file_name, 'w') as file:
             for key, value in metrics.items():
