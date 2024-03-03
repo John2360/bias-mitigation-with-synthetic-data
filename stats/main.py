@@ -42,7 +42,7 @@ class Stats:
         prob_predicted_positive_reference_group = self.try_or_zero(lambda: conf_matrix_reference_group[1, 1] / (conf_matrix_reference_group[1, 1] + conf_matrix_reference_group[0, 1]))
 
         # Calculate Disparate Impact
-        return prob_predicted_positive_protected_group / prob_predicted_positive_reference_group
+        return self.try_or_zero(lambda: prob_predicted_positive_protected_group / prob_predicted_positive_reference_group)
     
     def calculate_eod(self, protected_group, refrence_group):
         # Calculate confusion matrices for the protected and reference groups
