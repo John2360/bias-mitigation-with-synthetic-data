@@ -81,7 +81,7 @@ class Stats:
             return self.true_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.true_negatives_val = self.try_or_zero(conf_matrix[0, 0])
+        self.true_negatives_val = self.try_or_zero(lambda: conf_matrix[0, 0])
         return self.true_negatives_val
 
     def false_positives(self):
@@ -89,7 +89,7 @@ class Stats:
             return self.false_positives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_positives_val = self.try_or_zero(conf_matrix[0, self.positive_label])
+        self.false_positives_val = self.try_or_zero(lambda: conf_matrix[0, self.positive_label])
         return self.false_positives_val
 
     def false_negatives(self):
@@ -97,62 +97,58 @@ class Stats:
             return self.false_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_negatives_val = self.try_or_zero(conf_matrix[self.positive_label, 0])
+        self.false_negatives_val = self.try_or_zero(lambda: conf_matrix[self.positive_label, 0])
         return self.false_negatives_val
 
     def true_positive_rate(self):
         tp = self.true_positives()
         fn = self.false_negatives()
-        return tp / (tp + fn)
+        return self.try_or_zero(lambda: tp / (tp + fn))
 
     def true_negative_rate(self):
         tn = self.true_negatives()
         fp = self.false_positives()
-        return tn / (tn + fp)
+        return self.try_or_zero(lambda: tn / (tn + fp))
 
     def false_positive_rate(self):
         fp = self.false_positives()
         tn = self.true_negatives()
-        return fp / (fp + tn)
+        return self.try_or_zero(lambda: fp / (fp + tn))
 
     def false_negative_rate(self):
         fn = self.false_negatives()
         tp = self.true_positives()
-        return fn / (fn + tp)
+        return self.try_or_zero(lambda: fn / (fn + tp))
 
     def false_discovery_rate(self):
         fp = self.false_positives()
         tp = self.true_positives()
-        return fp / (fp + tp)
+        return self.try_or_zero(lambda: fp / (fp + tp))
 
     def false_omission_rate(self):
         fn = self.false_negatives()
         tp = self.true_positives()
-        return fn / (fn + tp)
+        return self.try_or_zero(lambda: fn / (fn + tp))
 
     def positive_predictive_value(self):
         tp = self.true_positives()
         fp = self.false_positives()
-        return tp / (tp + fp)
+        return self.try_or_zero(lambda: tp / (tp + fp))
 
     def negative_predictive_value(self):
         tn = self.true_negatives()
         fn = self.false_negatives()
-        return tn / (tn + fn)
+        return self.try_or_zero(lambda: tn / (tn + fn))
 
     def rate_of_positive_predictions(self):
         tp = self.true_positives()
         fp = self.false_positives()
-        return (tp + fp) / len(self.labels)
+        return self.try_or_zero(lambda: (tp + fp) / len(self.labels))
 
     def rate_of_negative_predictions(self):
         tn = self.true_negatives()
         fn = self.false_negatives()
-        return (tn + fn) / len(self.labels)
-
-    def accuracy(labels, predictions):
-        tn, _, _, tp = confusion_matrix(y_true=labels, y_pred=predictions).ravel()
-        return (tn + tp) / len(labels)
+        return self.try_or_zero(lambda: (tn + fn) / len(self.labels))
     
     def save_metrics(self, category_a_indices, category_b_indices=None, category_a_name="Race", category_b_name="Sex", file_name='model_metrics.txt', doPrint=True):
         categoy_a_results = {}
