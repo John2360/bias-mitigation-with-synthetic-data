@@ -11,17 +11,23 @@ class Stats:
         self.false_positives_val = None
         self.false_negatives_val = None
 
+    def try_or_zero(self, func):
+        try:
+            return func()
+        except:
+            return 0
+
     def calculate_accuracy(self):
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        return (conf_matrix[0, 0] + conf_matrix[1, 1]) / conf_matrix.sum()
+        return self.try_or_zero(lambda: (conf_matrix[0, 0] + conf_matrix[1, 1]) / conf_matrix.sum())
 
     def calculate_spd(self, group_a, group_b):
         conf_matrix_group_a = confusion_matrix(y_true=self.labels[group_a], y_pred=self.predictions[group_a])
         conf_matrix_group_b = confusion_matrix(y_true=self.labels[group_b], y_pred=self.predictions[group_b])
 
         # Calculate probabilities of predicted positive for Group A and Group B
-        prob_predicted_positive_group_a = conf_matrix_group_a[1, 1] / (conf_matrix_group_a[1, 1] + conf_matrix_group_a[0, 1])
-        prob_predicted_positive_group_b = conf_matrix_group_b[1, 1] / (conf_matrix_group_b[1, 1] + conf_matrix_group_b[0, 1])
+        prob_predicted_positive_group_a = self.try_or_zero(lambda: conf_matrix_group_a[1, 1] / (conf_matrix_group_a[1, 1] + conf_matrix_group_a[0, 1]))
+        prob_predicted_positive_group_b = self.try_or_zero(lambda: conf_matrix_group_b[1, 1] / (conf_matrix_group_b[1, 1] + conf_matrix_group_b[0, 1]))
 
         # Calculate Statistical Parity Difference
         return prob_predicted_positive_group_a - prob_predicted_positive_group_b
@@ -32,8 +38,8 @@ class Stats:
         conf_matrix_reference_group = confusion_matrix(y_true=self.labels[refrence_group], y_pred=self.predictions[refrence_group])
 
         # Calculate probabilities of predicted positive for the protected and reference groups
-        prob_predicted_positive_protected_group = conf_matrix_protected_group[1, 1] / (conf_matrix_protected_group[1, 1] + conf_matrix_protected_group[0, 1])
-        prob_predicted_positive_reference_group = conf_matrix_reference_group[1, 1] / (conf_matrix_reference_group[1, 1] + conf_matrix_reference_group[0, 1])
+        prob_predicted_positive_protected_group = self.try_or_zero(lambda: conf_matrix_protected_group[1, 1] / (conf_matrix_protected_group[1, 1] + conf_matrix_protected_group[0, 1]))
+        prob_predicted_positive_reference_group = self.try_or_zero(lambda: conf_matrix_reference_group[1, 1] / (conf_matrix_reference_group[1, 1] + conf_matrix_reference_group[0, 1]))
 
         # Calculate Disparate Impact
         return prob_predicted_positive_protected_group / prob_predicted_positive_reference_group
@@ -44,8 +50,8 @@ class Stats:
         conf_matrix_reference_group = confusion_matrix(y_true=self.labels[refrence_group], y_pred=self.predictions[refrence_group])
 
         # Calculate true positive rates for the protected and reference groups
-        true_positive_rate_protected_group = conf_matrix_protected_group[1, 1] / (conf_matrix_protected_group[1, 1] + conf_matrix_protected_group[1, 0])
-        true_positive_rate_reference_group = conf_matrix_reference_group[1, 1] / (conf_matrix_reference_group[1, 1] + conf_matrix_reference_group[1, 0])
+        true_positive_rate_protected_group = self.try_or_zero(lambda: conf_matrix_protected_group[1, 1] / (conf_matrix_protected_group[1, 1] + conf_matrix_protected_group[1, 0]))
+        true_positive_rate_reference_group = self.try_or_zero(lambda: conf_matrix_reference_group[1, 1] / (conf_matrix_reference_group[1, 1] + conf_matrix_reference_group[1, 0]))
 
         # Calculate Equal Opportunity Difference
         return true_positive_rate_protected_group - true_positive_rate_reference_group
@@ -56,8 +62,8 @@ class Stats:
         conf_matrix_reference_group = confusion_matrix(y_true=self.labels[refrence_group], y_pred=self.predictions[refrence_group])
 
         # Calculate odds for the protected and reference groups
-        odds_protected_group = conf_matrix_protected_group[1, 1] / conf_matrix_protected_group[0, 1]
-        odds_reference_group = conf_matrix_reference_group[1, 1] / conf_matrix_reference_group[0, 1]
+        odds_protected_group = self.try_or_zero(lambda: conf_matrix_protected_group[1, 1] / conf_matrix_protected_group[0, 1])
+        odds_reference_group = self.try_or_zero(lambda: conf_matrix_reference_group[1, 1] / conf_matrix_reference_group[0, 1])
 
         # Calculate Average Absolute Odds Difference
         return 0.5 * abs(odds_protected_group - odds_reference_group)
@@ -67,7 +73,7 @@ class Stats:
             return self.true_positives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.true_positives_val = conf_matrix[self.positive_label, self.positive_label]
+        self.true_positives_val = self.try_or_zero(lambda: conf_matrix[self.positive_label, self.positive_label])
         return self.true_positives_val
 
     def true_negatives(self):
@@ -75,7 +81,7 @@ class Stats:
             return self.true_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.true_negatives_val = conf_matrix[0, 0]
+        self.true_negatives_val = self.try_or_zero(conf_matrix[0, 0])
         return self.true_negatives_val
 
     def false_positives(self):
@@ -83,7 +89,7 @@ class Stats:
             return self.false_positives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_positives_val = conf_matrix[0, self.positive_label]
+        self.false_positives_val = self.try_or_zero(conf_matrix[0, self.positive_label])
         return self.false_positives_val
 
     def false_negatives(self):
@@ -91,7 +97,7 @@ class Stats:
             return self.false_negatives_val
         
         conf_matrix = confusion_matrix(y_true=self.labels, y_pred=self.predictions)
-        self.false_negatives_val = conf_matrix[self.positive_label, 0]
+        self.false_negatives_val = self.try_or_zero(conf_matrix[self.positive_label, 0])
         return self.false_negatives_val
 
     def true_positive_rate(self):
